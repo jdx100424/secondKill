@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.maoshen.common.constant.CommonKey;
 import com.maoshen.component.base.errorcode.BaseErrorCode;
 import com.maoshen.component.exception.BaseException;
 import com.maoshen.component.other.DateUtils;
@@ -62,10 +63,12 @@ public class CommonsServiceImpl extends SecondKillBaseService implements Commons
 			throw new BaseException("MARKETING", BaseErrorCode.SERVICE_EXCEPTION);
 		}
 
+		String userEventLock = String.format(CommonKey.COMMON_SECONDKILL_ACTIVE, userId,EVENT_ID);
 		try {
+			redisService.lock(userEventLock);
 			// 抽奖
 			LotteryResult lotteryResult = lotteryService.lotteryWithStockOne(userId, EVENT_ID,false);
-			lotteryIncr(userId, EVENT_ID, nowDateInt);
+			lotteryIncrEventDay(userId, EVENT_ID, nowDateInt);
 			if (lotteryResult.isWin()) {
 				logger.info("prize ok,info:{}", JSONObject.toJSONString(lotteryResult.getLotteryRecordDto()));
 			} else {
@@ -75,7 +78,7 @@ public class CommonsServiceImpl extends SecondKillBaseService implements Commons
 			logger.error(e.getMessage(), e);
 			throw new BaseException("MARKETING", BaseErrorCode.SERVICE_EXCEPTION);
 		} finally {
-
+			redisService.unlock(userEventLock);
 		}
 		return null;
 	}

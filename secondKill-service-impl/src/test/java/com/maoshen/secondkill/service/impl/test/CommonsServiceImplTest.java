@@ -16,12 +16,30 @@ public class CommonsServiceImplTest extends BaseTest {
 
 	@Test
 	public void test() {
-		//Long userId = Long.valueOf(new Random().nextInt(10000000) + 10000000);
-		Long userId =5L;
+		// Long userId = Long.valueOf(new Random().nextInt(10000000) +
+		// 10000000);
+		Long userId = 80L;
 		try {
 			commonsService.draw(userId);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testLock() {
+		Long userId = Long.valueOf(new Random().nextInt(10000000) + 10000000);
+		
+		for(int i=0;i<2;i++){
+			new Thread(){
+				public void run(){
+					try {
+						commonsService.draw(userId);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}.start();
 		}
 	}
 }

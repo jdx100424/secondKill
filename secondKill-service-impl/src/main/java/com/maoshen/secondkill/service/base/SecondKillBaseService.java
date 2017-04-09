@@ -1,8 +1,11 @@
 package com.maoshen.secondkill.service.base;
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.maoshen.common.constant.CommonKey;
+import com.maoshen.component.other.TimeUtil;
 import com.maoshen.component.redis.RedisService;
 
 public abstract class SecondKillBaseService {
@@ -27,8 +30,8 @@ public abstract class SecondKillBaseService {
 		return count;
 	}
 
-	public void lotteryIncr(long userId, long eventId, Integer day) {
+	public void lotteryIncrEventDay(long userId, long eventId, Integer day) {
 		String key = String.format(CommonKey.COMMON_SECONDKILL_COUNT, userId, eventId, day);
-		redisService.incr(key);
+		redisService.incr(key,TimeUtil.getTodayEndLastTime(),TimeUnit.MILLISECONDS);
 	}
 }
