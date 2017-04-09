@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.maoshen.secondkill.dao.LotteryRecordDao">
+	<resultMap id="BaseResultMap"
+		type="com.maoshen.secondkill.domain.LotteryRecord">
+
+		<result column="id" jdbcType="INTEGER" property="id" />
+		<result column="user_id" jdbcType="INTEGER" property="userId" />
+		<result column="event_id" jdbcType="INTEGER" property="eventId" />
+		<result column="created" jdbcType="TIMESTAMP" property="created" />
+		<result column="updated" jdbcType="BIGINT" property="updated" />
+		<result column="round" jdbcType="INTEGER" property="round" />
+		<result column="prize_code" jdbcType="INTEGER" property="prizeCode" />
+		<result column="status" jdbcType="TINYINT" property="status" />
+		<result column="prize_id" jdbcType="INTEGER" property="prizeId" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="custom_type" property="customType" jdbcType="INTEGER" />
+		<result column="prize_name" property="prizeName" jdbcType="VARCHAR" />
+		<result column="expire_time" property="expireTime" jdbcType="TIMESTAMP" />
+
+	</resultMap>
+
+	<sql id="common_sql">
+		id,
+		user_id,
+		event_id,
+		created,
+		updated,
+		round,
+		prize_code,
+		status,
+		prize_id,
+		type,
+		custom_type,
+		prize_name,
+		expire_time
+	</sql>
+
+	<!-- 根据用户id、活动id、抽奖轮次获取用户抽奖纪录 -->
+	<select id="getByUserIdEvenIdAndRound" parameterType="map"
+		resultMap="BaseResultMap">
+		SELECT
+		<include refid="common_sql" />
+		FROM lottery_record
+		WHERE user_id=#{userId}
+		AND
+		event_id=#{eventId}
+		AND
+		round=#{round}
+	</select>
+
+	<insert id="saveLotteryRecord" useGeneratedKeys="true"
+		parameterType="com.maoshen.secondkill.domain.LotteryRecord"
+		keyProperty="id">
+		insert into
+		lottery_record(id,user_id,event_id,updated,round,prize_code,`status`,prize_id,type,custom_type,prize_name,expire_time)
+		values(#{id},#{userId},#{eventId},#{updated},#{round},#{prizeCode},#{status},#{prizeId},#{type},#{customType},#{prizeName},#{expireTime})
+	</insert>
+
+	<select id="getByUserIdEvenIdList" parameterType="map"
+		resultMap="BaseResultMap">
+		SELECT
+		<include refid="common_sql" />
+		FROM lottery_record
+		WHERE user_id=#{userId}
+		AND
+		event_id=#{eventId}
+		order
+		by id desc
+	</select>
+</mapper>

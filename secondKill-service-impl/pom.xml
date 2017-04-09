@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>secondKill</groupId>
+    <artifactId>secondKill</artifactId>
+    <version>0.0.2</version>
+  </parent>
+  <groupId>secondKill-service-impl</groupId>
+  <artifactId>secondKill-service-impl</artifactId>
+  <packaging>jar</packaging>
+  <dependencies>
+  	<!-- 引入的DUBBO -->
+    <dependency>
+		<groupId>commonDubbo-dubbo</groupId>
+      	<artifactId>commonDubbo-dubbo</artifactId>
+      	<version>0.0.2</version>
+      	<type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>secondKill-service</groupId>
+      <artifactId>secondKill-service</artifactId>
+      <version>0.0.2</version>
+      <type>jar</type>
+    </dependency>
+    <!-- 
+    <dependency>
+      <groupId>secondKill-dao</groupId>
+      <artifactId>secondKill-dao</artifactId>
+      <version>0.0.2</version>
+      <type>jar</type>
+    </dependency> -->
+    <dependency>
+      <groupId>secondKill-util</groupId>
+      <artifactId>secondKill-util</artifactId>
+      <version>0.0.2</version>
+      <type>jar</type>
+    </dependency>
+  </dependencies>
+</project>

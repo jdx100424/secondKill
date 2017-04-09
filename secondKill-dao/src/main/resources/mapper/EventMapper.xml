@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maoshen.secondkill.dao.EventDao">
+	<resultMap id="BaseResultMap"
+		type="com.maoshen.secondkill.domain.Event">
+		<!-- WARNING - @mbggenerated -->
+		<result column="id" jdbcType="INTEGER" property="id" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="description" jdbcType="VARCHAR" property="description" />
+		<result column="created" jdbcType="TIMESTAMP" property="created" />
+		<result column="start_date" jdbcType="TIMESTAMP" property="startDate" />
+		<result column="end_date" jdbcType="TIMESTAMP" property="endDate" />
+		<result column="status" jdbcType="TINYINT" property="status" />
+	</resultMap>
+
+	<sql id="common_sql">
+		id,
+		name,
+		description,
+		created,
+		start_date,
+		end_date,
+		status
+	</sql>
+
+	<select id="selectById" resultMap="BaseResultMap">
+		select <include refid="common_sql" /> from event where
+		id=#{id}
+	</select>
+</mapper>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.maoshen.secondkill.dao.PrizeDao">
+	<resultMap id="BaseResultMap"
+		type="com.maoshen.secondkill.domain.Prize">
+	
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="stock" property="stock" jdbcType="INTEGER" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+		<result column="event_id" property="eventId" jdbcType="INTEGER" />
+		<result column="begin_date" property="beginDate" jdbcType="TIMESTAMP" />
+		<result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
+		<result column="probability" property="probability" jdbcType="DOUBLE" />
+		<result column="created" property="created" jdbcType="TIMESTAMP" />
+		<result column="updated" property="updated" jdbcType="BIGINT" />
+		<result column="round" property="round" jdbcType="INTEGER" />
+		<result column="code" property="code" jdbcType="INTEGER" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="custom_type" property="customType" jdbcType="INTEGER" />
+		<result column="expire_time" property="expireTime" jdbcType="TIMESTAMP" />
+
+	</resultMap>
+
+	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
+	<select id="getByEvenIdAndRoundBetweenBeignDateAndEndDate"
+		parameterType="map" resultMap="BaseResultMap">
+		SELECT * FROM prize
+		WHERE event_id=#{eventId}
+		AND
+		round=#{round}
+		AND 
+		<![CDATA[
+		begin_date<=#{current} 
+		AND
+		end_date>#{current} 
+		]]>
+		ORDER BY begin_date ASC
+	</select>
+
+	<!-- 扣减奖品库存 -->
+	<update id="decreasePrizeStock" parameterType="map">
+		UPDATE prize SET
+		stock=stock-1, updated=#{updated} where id=#{id} AND stock>0
+	</update>
+
+	<!-- 扣减奖品库存 -->
+	<update id="decreasePrizeStockByCode" parameterType="map">
+		UPDATE prize
+		SET stock=stock-1, updated=#{updated} where code=#{code} and event_id
+		= #{eventId} AND stock>0
+	</update>
+
+	<delete id="deletePrizeByEventId" parameterType="map">
+		delete from
+		prize where event_id = #{eventId}
+	</delete>
+
+	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
+	<select id="getPrizeListByEventId" parameterType="map"
+		resultMap="BaseResultMap">
+		SELECT * FROM prize
+		WHERE event_id=#{eventId}
+		AND 
+		<![CDATA[
+		begin_date<=now()
+		AND
+		end_date>now()
+		]]>
+		ORDER BY begin_date ASC
+	</select>
+
+	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
+	<select id="getPrizeListHasStockByEventId" parameterType="map"
+		resultMap="BaseResultMap">
+		SELECT * FROM prize
+		WHERE event_id=#{eventId}
+		AND
+		stock>0
+		AND
+		<![CDATA[
+		begin_date<=now()
+		AND
+		end_date>now()
+		]]>
+		ORDER BY begin_date ASC
+	</select>
+
+</mapper>
