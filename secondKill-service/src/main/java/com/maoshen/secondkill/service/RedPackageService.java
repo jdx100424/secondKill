@@ -22,7 +22,7 @@ public interface RedPackageService {
 	 * @return 事件ID
 	 * @throws Exception
 	 */
-	public Long create(String redPackageName,int redPackageCount,Integer money,boolean isAllSame,List<Long> userIdList) throws Exception;
+	public Long create(String redPackageName,Integer redPackageCount,Integer money,boolean isAllSame,List<Long> userIdList) throws Exception;
 	/**
 	 * 抢票
 	 * 

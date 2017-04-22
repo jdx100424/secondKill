@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import com.maoshen.component.redis.RedisService;
 import com.maoshen.secondkill.dao.RedPackageDao;
 import com.maoshen.secondkill.domain.RedPackage;
 import com.maoshen.secondkill.service.RedPackageService;
+import com.maoshen.secondkill.service.impl.test.CommonsServiceImplTest;
 import com.maoshen.secondkill.service.vo.LotteryRecordDto;
 
 @Service("redPackageServiceImpl")
@@ -32,7 +34,7 @@ public class RedPackageServiceImpl implements RedPackageService {
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Long create(String redPackageName, int redPackageCount, Integer money, boolean isAllSame,
+	public Long create(String redPackageName, Integer redPackageCount, Integer money, boolean isAllSame,
 			List<Long> userIdList) throws Exception {
 		if (redPackageCount < 1 || redPackageCount >= 30 || money <= 0 || money >= 1000 || userIdList == null
 				|| userIdList.isEmpty() || userIdList.size() > 30) {
@@ -47,6 +49,8 @@ public class RedPackageServiceImpl implements RedPackageService {
 		Date endDate = c.getTime();
 		Long groupId = System.currentTimeMillis();
 
+		List<Double> redPackageList = getRandomRedPackage(money,redPackageCount,isAllSame);
+		
 		for (int i = 0; i < redPackageCount; i++) {
 			// 红包有效期为24小时
 			RedPackage redPackage = new RedPackage();
@@ -59,15 +63,7 @@ public class RedPackageServiceImpl implements RedPackageService {
 			redPackage.setEndDate(endDate);
 			redPackage.setProbability(1D);
 			redPackage.setCreated(nowDate);
-			if (isAllSame) {
-				BigDecimal big = new BigDecimal(money);
-				BigDecimal bigCount = new BigDecimal(redPackageCount);
-				double resultMoney = big.divide(bigCount).setScale(1, BigDecimal.ROUND_DOWN).doubleValue();
-				redPackage.setMoney(resultMoney);
-			} else {
-				// TODO
-				throw new BaseException("MARKETING", BaseErrorCode.SERVICE_EXCEPTION);
-			}
+			redPackage.setMoney(redPackageList.get(i));
 			list.add(redPackage);
 		}
 		//红包入库，并创建对应的单队列缓存
@@ -102,4 +98,57 @@ public class RedPackageServiceImpl implements RedPackageService {
 		return null;
 	}
 
+	private List<Double> getRandomRedPackage(Integer money,Integer size,boolean isAllSame){
+		List<Double> resultList = new ArrayList<Double>();
+		if(isAllSame){
+			BigDecimal big = new BigDecimal(money);
+			BigDecimal bigCount = new BigDecimal(size);
+			double resultMoney = big.divide(bigCount).setScale(1, BigDecimal.ROUND_DOWN).doubleValue();
+			for (int i = 0; i < size; i++) {
+				resultList.add(resultMoney);
+			}
+		}else{
+			LeftMoneyPackage leftMoneyPackage = new LeftMoneyPackage();
+			leftMoneyPackage.setRemainMoney(money);
+			leftMoneyPackage.setRemainSize(size);
+			for(int i=0;i<size;i++){
+				double result =  getRandom(leftMoneyPackage);
+				resultList.add(result);
+			}
+		}
+		return resultList;
+	}
+	
+	private double getRandom(LeftMoneyPackage _leftMoneyPackage){
+		if (_leftMoneyPackage.remainSize == 1) {
+			_leftMoneyPackage.remainSize--;
+			return (double)Math.round(_leftMoneyPackage.remainMoney*100)/100;
+		}
+		Random r = new Random();
+		double min = 0.01;
+		double max = _leftMoneyPackage.remainMoney/_leftMoneyPackage.remainSize*2;
+		double money = r.nextDouble()*max;
+		money = money<=min?0.01:money;
+		money = Math.floor(money*100)/100;
+		_leftMoneyPackage.remainSize--;
+		_leftMoneyPackage.remainMoney = _leftMoneyPackage.remainMoney-money;
+		return money;
+	} 
+	
+	public class LeftMoneyPackage {
+		public int remainSize;
+		public double remainMoney;
+		public int getRemainSize() {
+			return remainSize;
+		}
+		public void setRemainSize(int remainSize) {
+			this.remainSize = remainSize;
+		}
+		public double getRemainMoney() {
+			return remainMoney;
+		}
+		public void setRemainMoney(double remainMoney) {
+			this.remainMoney = remainMoney;
+		}
+	}
 }
