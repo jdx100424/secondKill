@@ -13,7 +13,8 @@ import com.maoshen.secondkill.service.vo.LotteryRecordDto;
  */
 public interface RedPackageService {
 	/**
-	 * 生成红包，
+	 * 生成红包，确定抢红包的USERID集合和此红包的GROUPID,红包放在redPackage表里，以GROUPID分开，每个红包有指定的钱，概率100%，
+	 * 
 	 * @param redPackageCount，红包数
 	 * @param money，总金额
 	 * @param isAllSame，红包里面的前是否一致
@@ -21,7 +22,7 @@ public interface RedPackageService {
 	 * @return 事件ID
 	 * @throws Exception
 	 */
-	public Long create(int redPackageCount,BigDecimal money,boolean isAllSame,List<Long> userIdList) throws Exception;
+	public Long create(String redPackageName,int redPackageCount,Integer money,boolean isAllSame,List<Long> userIdList) throws Exception;
 	/**
 	 * 抢票
 	 * 

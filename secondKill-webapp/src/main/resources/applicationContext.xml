@@ -57,6 +57,14 @@
 		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
 		<property name="validationMessageSource" ref="messageSource" />
 	</bean>
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">  
+    	<property name="messageConverters">  
+       		<list>  
+            	<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />  
+    		</list>
+    	</property>  
+	</bean>  
     
     <!-- sqldb,dubbo,redis,timeTask -->
     <import resource="sqlContext.xml" />

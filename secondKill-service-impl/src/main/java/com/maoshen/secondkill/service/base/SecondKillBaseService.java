@@ -32,6 +32,6 @@ public abstract class SecondKillBaseService {
 
 	public void lotteryIncrEventDay(long userId, long eventId, Integer day) {
 		String key = String.format(CommonKey.COMMON_SECONDKILL_COUNT, userId, eventId, day);
-		redisService.incr(key,TimeUtil.getTodayEndLastTime(),TimeUnit.MILLISECONDS);
+		redisService.incr(key,TimeUtil.getTodayEndLastTime(),TimeUnit.SECONDS);
 	}
 }

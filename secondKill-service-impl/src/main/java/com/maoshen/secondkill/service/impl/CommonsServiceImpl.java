@@ -12,6 +12,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.maoshen.common.constant.CommonKey;
@@ -47,6 +48,7 @@ public class CommonsServiceImpl extends SecondKillBaseService implements Commons
 	private static final Logger logger = LoggerFactory.getLogger(CommonsServiceImpl.class);
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public LotteryRecordDto draw(Long userId) throws Exception {
 		Date nowDate = new Date();
 		Integer nowDateInt = Integer.parseInt(DateUtils.format(nowDate, "yyyyMMdd"));

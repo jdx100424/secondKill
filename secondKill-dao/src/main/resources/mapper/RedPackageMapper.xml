@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.maoshen.secondkill.dao.PrizeDao">
+<mapper namespace="com.maoshen.secondkill.dao.RedPackageDao">
 	<resultMap id="BaseResultMap"
-		type="com.maoshen.secondkill.domain.Prize">
+		type="com.maoshen.secondkill.domain.RedPackage">
 	
 		<id column="id" property="id" jdbcType="INTEGER" />
 		<result column="name" property="name" jdbcType="VARCHAR" />
@@ -19,9 +19,12 @@
 		<result column="type" property="type" jdbcType="INTEGER" />
 		<result column="custom_type" property="customType" jdbcType="INTEGER" />
 		<result column="expire_time" property="expireTime" jdbcType="TIMESTAMP" />
+		
+		<result column="money" property="money" jdbcType="DOUBLE" />
+		<result column="group_id" property="groupId" jdbcType="BIGINT" />
 
 	</resultMap>
-
+	
 	<sql id="common_sql">
 		id,
 		name,
@@ -37,14 +40,60 @@
 		code,
 		type,
 		custom_type,
-		expire_time
+		expire_time,
+		money,
+		group_id
 	</sql>
 
+	<insert id ="createRedPackage" parameterType="java.util.List" keyProperty= "id">
+        INSERT INTO redpackage
+	    (
+	    id,
+		name,
+		stock,
+		description,
+		event_id,
+		begin_date,
+		end_date,
+		probability,
+		created,
+		updated,
+		round,
+		code,
+		type,
+		custom_type,
+		expire_time,
+		money,
+		group_id
+		)
+        values
+        <foreach collection ="list" item="item" index= "index" separator =",">
+            (
+        #{item.id},
+		#{item.name},
+		#{item.stock},
+		#{item.description},
+		#{item.eventId},
+		#{item.beginDate},
+		#{item.endDate},
+		#{item.probability},
+		#{item.created},
+		#{item.updated},
+		#{item.round},
+		#{item.code},
+		#{item.type},
+		#{item.customType},
+		#{item.expireTime},
+		#{item.money},
+		#{item.groupId}
+            )
+        </foreach>
+    </insert>
 
 	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
 	<select id="getByEvenIdAndRoundBetweenBeignDateAndEndDate"
 		parameterType="map" resultMap="BaseResultMap">
-		SELECT <include refid="common_sql" /> FROM prize
+		SELECT <include refid="common_sql" /> FROM redpackage
 		WHERE event_id=#{eventId}
 		AND
 		round=#{round}
@@ -58,27 +107,34 @@
 	</select>
 
 	<!-- 扣减奖品库存 -->
-	<update id="decreasePrizeStock" parameterType="map">
-		UPDATE prize SET
+	<update id="decreaseRedPackageStock" parameterType="map">
+		UPDATE redpackage SET
 		stock=stock-1, updated=#{updated} where id=#{id} AND stock>0
 	</update>
 
 	<!-- 扣减奖品库存 -->
-	<update id="decreasePrizeStockByCode" parameterType="map">
-		UPDATE prize
+	<update id="decreaseRedPackageStockByCode" parameterType="map">
+		UPDATE redpackage
 		SET stock=stock-1, updated=#{updated} where code=#{code} and event_id
 		= #{eventId} AND stock>0
 	</update>
 
-	<delete id="deletePrizeByEventId" parameterType="map">
+	<delete id="deleteRedPackageByEventId" parameterType="map">
 		delete from
-		prize where event_id = #{eventId}
+		redpackage where event_id = #{eventId}
 	</delete>
 
-	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
-	<select id="getPrizeListByEventId" parameterType="map"
+	<!-- 根据groupId -->
+	<select id="getRedPackageListByGroupId" parameterType="map"
 		resultMap="BaseResultMap">
-		SELECT <include refid="common_sql" /> FROM prize
+		SELECT <include refid="common_sql" /> FROM redpackage
+		WHERE group_id=#{groupId}
+	</select>
+
+	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
+	<select id="getRedPackageListByEventId" parameterType="map"
+		resultMap="BaseResultMap">
+		SELECT <include refid="common_sql" /> FROM redpackage
 		WHERE event_id=#{eventId}
 		AND 
 		<![CDATA[
@@ -90,9 +146,9 @@
 	</select>
 
 	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
-	<select id="getPrizeListHasStockByEventId" parameterType="map"
+	<select id="getRedPackageListHasStockByEventId" parameterType="map"
 		resultMap="BaseResultMap">
-		SELECT <include refid="common_sql" /> FROM prize
+		SELECT <include refid="common_sql" /> FROM redpackage
 		WHERE event_id=#{eventId}
 		AND
 		stock>0
