@@ -7,29 +7,48 @@
 		<id column="id" property="id" jdbcType="INTEGER" />
 		<result column="user_id" property="userId" jdbcType="BIGINT" />
 		<result column="group_id" property="groupId" jdbcType="BIGINT" />
-
+		<result column="created" property="created" jdbcType="TIMESTAMP" />
+		<result column="updated" property="updated" jdbcType="BIGINT" />
+		<result column="money" property="money" jdbcType="DOUBLE" />
 	</resultMap>
 	
 	<sql id="common_sql">
 		id,
-		name,
-		stock,
-		description,
-		event_id,
-		begin_date,
-		end_date,
-		probability,
+		user_id,
+		group_id,
 		created,
 		updated,
-		round,
-		code,
-		type,
-		custom_type,
-		expire_time,
-		money,
-		group_id
+		money
 	</sql>
 
-	
+	<!-- 根据groupId -->
+	<select id="getDrawRecord" parameterType="map"
+		resultMap="BaseResultMap">
+		SELECT <include refid="common_sql" /> FROM redpackage_user
+		WHERE group_id=#{groupId} and user_id = #{userId}
+	</select>
+
+	<insert id ="insertDrawRecord" useGeneratedKeys="true"
+		parameterType="com.maoshen.secondkill.domain.RedPackageUser"
+		keyProperty="id">
+        INSERT INTO redpackage_user
+	    (
+	    id,
+		user_id,
+		group_id,
+		created,
+		updated,
+		money
+		)
+        values
+            (
+        #{id},
+		#{userId},
+		#{groupId},
+		#{created},
+		#{updated},
+		#{money}
+            )
+    </insert>
 
 </mapper>

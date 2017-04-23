@@ -1,10 +1,22 @@
-package com.maoshen.secondkill.domain;
+package com.maoshen.secondkill.service.vo;
 
+import java.io.Serializable;
 import java.util.Date;
 
-import com.maoshen.base.entity.BaseEntity;
+public class RedPackageUserDto implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private long id;
 
-public class RedPackageUser extends BaseEntity {
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
 	private Long userId;
 	private Long groupId;
 	

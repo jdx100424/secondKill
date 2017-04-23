@@ -90,75 +90,16 @@
         </foreach>
     </insert>
 
-	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
-	<select id="getByEvenIdAndRoundBetweenBeignDateAndEndDate"
-		parameterType="map" resultMap="BaseResultMap">
-		SELECT <include refid="common_sql" /> FROM redpackage
-		WHERE event_id=#{eventId}
-		AND
-		round=#{round}
-		AND 
-		<![CDATA[
-		begin_date<=#{current} 
-		AND
-		end_date>#{current} 
-		]]>
-		ORDER BY begin_date ASC
-	</select>
-
 	<!-- 扣减奖品库存 -->
-	<update id="decreaseRedPackageStock" parameterType="map">
-		UPDATE redpackage SET
-		stock=stock-1, updated=#{updated} where id=#{id} AND stock>0
-	</update>
-
-	<!-- 扣减奖品库存 -->
-	<update id="decreaseRedPackageStockByCode" parameterType="map">
+	<update id="drawRedPackage" parameterType="map">
 		UPDATE redpackage
-		SET stock=stock-1, updated=#{updated} where code=#{code} and event_id
-		= #{eventId} AND stock>0
+		SET stock=0, updated=#{updated} where id=#{id} AND stock>0
 	</update>
-
-	<delete id="deleteRedPackageByEventId" parameterType="map">
-		delete from
-		redpackage where event_id = #{eventId}
-	</delete>
 
 	<!-- 根据groupId -->
 	<select id="getRedPackageListByGroupId" parameterType="map"
 		resultMap="BaseResultMap">
 		SELECT <include refid="common_sql" /> FROM redpackage
-		WHERE group_id=#{groupId}
+		WHERE group_id=#{groupId} and event_id = #{eventId}
 	</select>
-
-	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
-	<select id="getRedPackageListByEventId" parameterType="map"
-		resultMap="BaseResultMap">
-		SELECT <include refid="common_sql" /> FROM redpackage
-		WHERE event_id=#{eventId}
-		AND 
-		<![CDATA[
-		begin_date<=now()
-		AND
-		end_date>now()
-		]]>
-		ORDER BY begin_date ASC
-	</select>
-
-	<!-- 根据指定活动id获取对应时间内的奖品库存 -->
-	<select id="getRedPackageListHasStockByEventId" parameterType="map"
-		resultMap="BaseResultMap">
-		SELECT <include refid="common_sql" /> FROM redpackage
-		WHERE event_id=#{eventId}
-		AND
-		stock>0
-		AND
-		<![CDATA[
-		begin_date<=now()
-		AND
-		end_date>now()
-		]]>
-		ORDER BY begin_date ASC
-	</select>
-
 </mapper>

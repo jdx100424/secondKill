@@ -29,6 +29,7 @@ import com.maoshen.component.exception.BaseException;
 import com.maoshen.component.rest.UserRestContext;
 import com.maoshen.secondkill.request.RedPackageRequest;
 import com.maoshen.secondkill.service.RedPackageService;
+import com.maoshen.secondkill.service.vo.RedPackageUserDto;
 
 /**
  * 
@@ -72,6 +73,20 @@ public class RedPackageController extends BaseController {
 		Long groupId = redPackageService.create(StringUtils.isBlank(redPackageRequest.getRedPackageName())?"恭喜发财，大吉大利":redPackageRequest.getRedPackageName(), redPackageRequest.getRedPackageCount(), redPackageRequest.getMoney(),isSame , redPackageRequest.getUserIdList());
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("url", groupId);
+		return new ResponseResultDto<Map<String, Object>>(resultMap);
+	}
+	
+	@RequestMapping(value = "draw", method = { RequestMethod.POST, RequestMethod.GET })
+	@ResponseBody
+	public ResponseResultDto<Map<String, Object>> draw(HttpServletRequest request, Model model, @RequestBody RedPackageRequest redPackageRequest) throws Exception {
+		UserRestContext userRestContext = UserRestContext.get();
+		if(redPackageRequest==null || redPackageRequest.getUserId()==null  || redPackageRequest.getGroupId()==null
+				){
+			throw new BaseException("MARKETING", BaseErrorCode.SERVICE_EXCEPTION);
+		}
+		RedPackageUserDto redPackageUserDto = redPackageService.draw(redPackageRequest.getUserId(),redPackageRequest.getGroupId());
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("info", redPackageUserDto);
 		return new ResponseResultDto<Map<String, Object>>(resultMap);
 	}
 

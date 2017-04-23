@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,16 +20,21 @@ import com.maoshen.component.base.errorcode.BaseErrorCode;
 import com.maoshen.component.exception.BaseException;
 import com.maoshen.component.redis.RedisService;
 import com.maoshen.secondkill.dao.RedPackageDao;
+import com.maoshen.secondkill.dao.RedPackageUserDao;
 import com.maoshen.secondkill.domain.RedPackage;
+import com.maoshen.secondkill.domain.RedPackageUser;
 import com.maoshen.secondkill.service.RedPackageService;
-import com.maoshen.secondkill.service.impl.test.CommonsServiceImplTest;
 import com.maoshen.secondkill.service.vo.LotteryRecordDto;
+import com.maoshen.secondkill.service.vo.RedPackageDto;
+import com.maoshen.secondkill.service.vo.RedPackageUserDto;
 
 @Service("redPackageServiceImpl")
 public class RedPackageServiceImpl implements RedPackageService {
 	private static final Long EVENT_ID = 2L;
 	@Autowired
 	private RedPackageDao redPackageDao;
+	@Autowired
+	private RedPackageUserDao redPackageUserDao;
 	@Autowired
 	private RedisService redisService;
 	
@@ -68,11 +74,13 @@ public class RedPackageServiceImpl implements RedPackageService {
 		}
 		//红包入库，并创建对应的单队列缓存
 		redPackageDao.createRedPackage(list);
-		List<Long> redPackageIdList = new ArrayList<Long>();
-		List<RedPackage> resultList = redPackageDao.getRedPackageListByGroupId(groupId);
+		List<RedPackageDto> redPackageIdList = new ArrayList<RedPackageDto>();
+		List<RedPackage> resultList = redPackageDao.getRedPackageListByGroupId(groupId,EVENT_ID);
 		String userRedPackage = String.format(CommonKey.REDPACKAGE_SECONDKILL_ID, groupId);
 		for(RedPackage redPackage:resultList){
-			redPackageIdList.add(redPackage.getId());
+			RedPackageDto redPackageDto = new RedPackageDto();
+			BeanUtils.copyProperties(redPackage, redPackageDto);
+			redPackageIdList.add(redPackageDto);
 		}
 		redisService.insertAllList(userRedPackage, redPackageIdList, 23, TimeUnit.HOURS);	
 		
@@ -87,8 +95,43 @@ public class RedPackageServiceImpl implements RedPackageService {
 	}
 
 	@Override
-	public LotteryRecordDto draw(Long userId, Long eventId) throws Exception {
-		// TODO Auto-generated method stub
+	@Transactional(rollbackFor = Exception.class)
+	public RedPackageUserDto draw(Long userId, Long groupId) throws Exception {
+		String allowUser = String.format(CommonKey.REDPACKAGE_SECONDKILL_ID_USERLIST, groupId);
+		//先查看GROUPID此用户是否已经抽过
+		List<RedPackageUser> checkList = redPackageUserDao.getDrawRecord(groupId, userId);
+		if(checkList!=null && checkList.isEmpty()==false){
+			RedPackageUser redPackageUser = checkList.get(0);
+			RedPackageUserDto redPackageUserDto = new RedPackageUserDto();
+			BeanUtils.copyProperties(redPackageUser, redPackageUserDto);
+			return redPackageUserDto;
+		}
+		
+		//查看此用户是否允许在此GROUPID抢红包
+		Object checkUserId = redisService.getByHash(allowUser, userId);
+		if(checkUserId==null || Long.parseLong(checkUserId.toString())<=0){
+			throw new BaseException("MARKETING", BaseErrorCode.SERVICE_EXCEPTION);
+		}
+		//弹出此GROUPID的红包
+		String userRedPackage = String.format(CommonKey.REDPACKAGE_SECONDKILL_ID, groupId);
+		Object drawRedPackage = redisService.rightPopList(userRedPackage);
+		if(drawRedPackage != null){
+			RedPackageDto redPackageDto = (RedPackageDto) drawRedPackage;
+			//更新数据库看看是否OK
+			int drawResult = redPackageDao.drawRedPackage(redPackageDto.getId(), System.currentTimeMillis());
+			if(drawResult > 0){
+				RedPackageUser redPackageUser = new RedPackageUser();
+				redPackageUser.setCreated(new Date());
+				redPackageUser.setGroupId(redPackageDto.getGroupId());
+				redPackageUser.setUpdated(System.currentTimeMillis());
+				redPackageUser.setUserId(userId);
+				redPackageUser.setMoney(redPackageDto.getMoney());
+				redPackageUserDao.insertDrawRecord(redPackageUser);
+				RedPackageUserDto dto = new RedPackageUserDto();
+				BeanUtils.copyProperties(redPackageUser, dto);
+				return dto;
+			}
+		}
 		return null;
 	}
 

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.maoshen.secondkill.service.vo.LotteryRecordDto;
+import com.maoshen.secondkill.service.vo.RedPackageDto;
+import com.maoshen.secondkill.service.vo.RedPackageUserDto;
 
 /**
  * 发指定的红包给指定的人
@@ -30,7 +32,7 @@ public interface RedPackageService {
 	 * @param eventId,
 	 * @return
 	 */
-	public LotteryRecordDto draw(Long userId,Long eventId) throws Exception;
+	public RedPackageUserDto draw(Long userId,Long groupId) throws Exception;
 
 	/**
 	 * 查询指定用户中奖记录
