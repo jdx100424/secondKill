@@ -98,6 +98,12 @@ public class RedPackageServiceImpl implements RedPackageService {
 	@Transactional(rollbackFor = Exception.class)
 	public RedPackageUserDto draw(Long userId, Long groupId) throws Exception {
 		String allowUser = String.format(CommonKey.REDPACKAGE_SECONDKILL_ID_USERLIST, groupId);
+		//查看此用户是否允许在此GROUPID抢红包
+		Object checkUserId = redisService.getByHash(allowUser, userId);
+		if(checkUserId==null || Long.parseLong(checkUserId.toString())<=0){
+			throw new BaseException("MARKETING", BaseErrorCode.SERVICE_EXCEPTION);
+		}
+		
 		//先查看GROUPID此用户是否已经抽过
 		List<RedPackageUser> checkList = redPackageUserDao.getDrawRecord(groupId, userId);
 		if(checkList!=null && checkList.isEmpty()==false){
@@ -106,12 +112,7 @@ public class RedPackageServiceImpl implements RedPackageService {
 			BeanUtils.copyProperties(redPackageUser, redPackageUserDto);
 			return redPackageUserDto;
 		}
-		
-		//查看此用户是否允许在此GROUPID抢红包
-		Object checkUserId = redisService.getByHash(allowUser, userId);
-		if(checkUserId==null || Long.parseLong(checkUserId.toString())<=0){
-			throw new BaseException("MARKETING", BaseErrorCode.SERVICE_EXCEPTION);
-		}
+
 		//弹出此GROUPID的红包
 		String userRedPackage = String.format(CommonKey.REDPACKAGE_SECONDKILL_ID, groupId);
 		Object drawRedPackage = redisService.rightPopList(userRedPackage);
