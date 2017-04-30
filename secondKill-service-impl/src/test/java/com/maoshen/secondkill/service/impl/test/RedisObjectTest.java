@@ -21,7 +21,8 @@ public class RedisObjectTest extends BaseTest {
 		//testObject.setName("jdxName");
 		try {
 			//redisService.insertByValue("111", testObject,1,TimeUnit.HOURS);
-			TestObject testObjectClass = (TestObject) redisService.getByValue("111");
+			//TestObject testObjectClass = (TestObject) redisService.getByValue("111");
+			TestObject testObjectClass = redisService.getByValue("222");
 			System.out.println(JSONObject.toJSONString(testObjectClass));
 		} catch (Exception e) {
 			e.printStackTrace();
